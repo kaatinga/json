@@ -46,6 +46,11 @@ func (s *Scanner) Seek() error {
 
 		s.byte = s.data[s.position]
 
+		if s.byte != Comma && s.pass {
+			//fmt.Println("fast continue")
+			continue
+		}
+
 		//fmt.Printf("we are checking %#v\n", s.byte)
 		//fmt.Println("position", s.position)
 
@@ -57,11 +62,6 @@ func (s *Scanner) Seek() error {
 
 		switch s.byte {
 		case QuotationMark:
-			if s.pass {
-				//fmt.Println("passing the value")
-				continue
-			}
-
 			if !s.value {
 				//fmt.Println("checking the token...")
 				s.pass = !s.validateToken()
@@ -72,11 +72,6 @@ func (s *Scanner) Seek() error {
 			s.read = true
 			continue
 		case Colon:
-			if s.pass {
-				//fmt.Println("passing the value")
-				continue
-			}
-
 			//fmt.Println("waiting for value")
 			if s.value {
 				//fmt.Println("we are waiting for a value already, colon is repeated")
@@ -152,13 +147,16 @@ func (s *Scanner) validateToken() bool {
 	for ; s.position != end; s.position++ {
 		if s.position < len(s.data) && s.sample[s.position-start] != s.data[s.position] {
 			//fmt.Println("один из байтов имени переменной не совпадает или мы вышли за рамки")
-			//fmt.Printf("comparing %#v and  %#v \n", s.sample[s.position-start], s.data[s.position])
+			//fmt.Printf("comparing %#v and %#v\n", s.sample[s.position-start], s.data[s.position])
+			//fmt.Println("position", s.position)
+			//fmt.Println("end", end)
 			return false
 		}
 	}
 
 	// as we are here, we can check colon that it fallows the last position
 	if s.position < len(s.data) && s.data[s.position] != QuotationMark {
+		//fmt.Println("the data were similar but not the sample :)")
 		return false
 	}
 
