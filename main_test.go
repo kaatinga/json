@@ -113,8 +113,9 @@ func TestScanner_Seek(t *testing.T) {
 		wantErr error
 	}{
 		{"ok1", Scanner{}, secret, jsonExample, nil},
-		{"!ok1", Scanner{}, []byte("mmm"), jsonExample, nil},
+		{"!ok1", Scanner{}, []byte("mmm"), jsonExample, WarnNotFound},
 		{"!ok2", Scanner{}, []byte("mmm"), []byte("mmmmm"), ErrInvalidJSON},
+		{"!ok3", Scanner{}, []byte("secr"), jsonExample, WarnNotFound},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
