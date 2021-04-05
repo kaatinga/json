@@ -23,15 +23,6 @@ func (s *Scanner) SetSample(sample []byte) error {
 	return nil
 }
 
-func (s *Scanner) SetData(data []byte) error {
-	if len(data) == minimumJSONLength || len(data) > 256 {
-		return ErrInvalidDataLength
-	}
-
-	s.data = data
-	return nil
-}
-
 // newParameter makes the Scanner ready to parse the next parameter.
 func (s *Scanner) newParameter() {
 	s.pass = false
@@ -39,8 +30,21 @@ func (s *Scanner) newParameter() {
 	s.read = false
 }
 
-// Seek returns data of the sample parameter.
-func (s *Scanner) Seek() error {
+// SeekIn processes the input data looking for sample value.
+// It returns warnings if the value is not string and errors if an error occurred.
+func (s *Scanner) SeekIn(data []byte) error {
+
+	// check if the sample is set
+	if s.sample == nil {
+		return ErrSampleNotSet
+	}
+
+	// check if the length of the data is correct
+	if len(data) < minimumJSONLength+len(s.sample) || len(data) > 256 {
+		return ErrInvalidDataLength
+	}
+
+	s.data = data
 
 	for ; s.position < len(s.data); s.position++ {
 
@@ -92,18 +96,21 @@ func (s *Scanner) Seek() error {
 			s.newParameter()
 			continue
 		case True:
-			if !s.validateToken() {
+			if s.validate(jsonTrue) {
 				s.parsedBool = true
-				return nil
+				return WarnBoolWasFound
 			}
+			return ErrInvalidJSON
 		case False:
-			if !s.validateToken() {
-				return nil
+			if s.validate(jsonFalse) {
+				return WarnBoolWasFound
 			}
+			return ErrInvalidJSON
 		case Null:
-			if !s.validateToken() {
+			if s.validate(jsonNull) {
 				return WarnNullWasFound
 			}
+			return ErrInvalidJSON
 		case ArrayEnd:
 			//fmt.Println("array is unsupported, soon we will finish")
 			continue
@@ -125,6 +132,30 @@ func (s *Scanner) Seek() error {
 		return ErrInvalidJSON
 	}
 	return WarnNotFound
+}
+
+func (s *Scanner) validate(sample []byte) bool {
+	//fmt.Println("checking bool value:", string(sample))
+	start := s.position
+
+	end := s.position + len(sample)
+	//fmt.Println("установили конечную точку сравнения")
+
+	if end > len(s.data) {
+		//fmt.Println("конечная точка неожиданно дальше максимальной длины данных")
+		return false
+	}
+
+	for ; s.position != end; s.position++ {
+		if s.position < len(s.data) && sample[s.position-start] != s.data[s.position] {
+			//fmt.Println("один из байтов имени переменной не совпадает или мы вышли за рамки")
+			//fmt.Printf("comparing %#v and %#v\n", sample[s.position-start], s.data[s.position])
+			//fmt.Println("position", s.position)
+			//fmt.Println("end", end)
+			return false
+		}
+	}
+	return true
 }
 
 // validateToken compares the sample and the data starting the position.
