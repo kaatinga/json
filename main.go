@@ -14,13 +14,18 @@ type Scanner struct {
 	parsedBool bool
 }
 
-func (s *Scanner) SetSample(sample []byte) error {
+// NewScanner creates new scanner with a sample inside.
+func NewScanner(sample []byte) (*Scanner, error) {
 	if len(sample) == 0 || len(sample) > maximumSampleLength {
-		return ErrInvalidSampleLength
+		return nil, ErrInvalidSampleLength
 	}
 
-	s.sample = sample
-	return nil
+	return &Scanner{sample: sample}, nil
+}
+
+// ParsedData returns parsed value.
+func (s *Scanner) ParsedData() []byte {
+	return s.parsedData
 }
 
 // newParameter makes the Scanner ready to parse the next parameter.
