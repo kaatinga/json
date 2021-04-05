@@ -134,6 +134,7 @@ func (s *Scanner) SeekIn(data []byte) error {
 	return WarnNotFound
 }
 
+// validate checks the value and input sample.
 func (s *Scanner) validate(sample []byte) bool {
 	//fmt.Println("checking bool value:", string(sample))
 	start := s.position
