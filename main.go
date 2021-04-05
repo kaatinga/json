@@ -49,6 +49,8 @@ func (s *Scanner) SeekIn(data []byte) error {
 		return ErrInvalidDataLength
 	}
 
+	defer s.reset()
+
 	s.data = data
 
 	for ; s.position < len(s.data); s.position++ {
@@ -162,6 +164,19 @@ func (s *Scanner) validate(sample []byte) bool {
 		}
 	}
 	return true
+}
+
+func (s *Scanner) reset() {
+	s.position = 0
+	//s.byte = 0
+	//sample     []byte
+	//s.data = nil
+	s.started = false
+	s.value = false
+	s.pass = false
+	s.read = false
+	//s.parsedData = nil
+	//s.parsedBool = false
 }
 
 // validateToken compares the sample and the data starting the position.

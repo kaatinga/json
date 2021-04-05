@@ -148,6 +148,11 @@ func TestScanner_Seek(t *testing.T) {
 				t.Errorf("SeekIn() error is incorrect\nhave '%v'\nwant '%v'", err, tt.wantErr)
 			}
 
+			err = s.SeekIn(tt.data)
+			if err != tt.wantErr {
+				t.Errorf("Second SeekIn() error is incorrect\nhave '%v'\nwant '%v'", err, tt.wantErr)
+			}
+
 			if !reflect.DeepEqual(s.parsedData, tt.value) {
 				t.Errorf("value:\nhave '%v'\nwant '%v'", string(s.parsedData), string(tt.value))
 			}
@@ -155,6 +160,8 @@ func TestScanner_Seek(t *testing.T) {
 			if s.parsedBool != tt.boolValue {
 				t.Errorf("bool value:\nhave '%v'\nwant '%v'", s.parsedBool, tt.boolValue)
 			}
+
+			t.Log(string(s.data))
 		})
 	}
 }
