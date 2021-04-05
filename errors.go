@@ -6,6 +6,7 @@ const (
 	ErrInvalidSampleLength cer.Error = "invalid sample length"
 	ErrInvalidDataLength   cer.Error = "invalid data length"
 	ErrInvalidJSON         cer.Error = "json format is not valid"
+	ErrSampleNotSet        cer.Error = "sample must be set first"
 
 	ErrInvalidValue cer.Error = "the value was not read as data format is corrupted"
 
