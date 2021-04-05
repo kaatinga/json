@@ -19,6 +19,6 @@ func BenchmarkParseJSON(b *testing.B) {
 			sample: secret,
 			data:   jsonExample,
 		}
-		scanner.Seek()
+		scanner.SeekIn()
 	}
 }
