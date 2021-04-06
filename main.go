@@ -11,7 +11,7 @@ type Scanner struct {
 	data         []byte
 	value        bool // the field is found and we ready to read value
 	pass         bool // to pass value indicator
-	read         bool
+	readText     bool
 	parsedData   []byte
 	parsedBool   bool
 	parsedNumber int64
@@ -35,12 +35,14 @@ func (s *Scanner) ParsedData() []byte {
 func (s *Scanner) newParameter() {
 	s.pass = false
 	s.value = false
-	s.read = false
+	s.readText = false
 }
 
 // SeekIn processes the input data looking for sample value.
 // It returns warnings if the value is not string and errors if an error occurred.
 func (s *Scanner) SeekIn(data []byte) error {
+
+	s.reset()
 
 	// check if the sample is set
 	if s.sample == nil {
@@ -51,8 +53,6 @@ func (s *Scanner) SeekIn(data []byte) error {
 	if len(data) < minimumJSONLength+len(s.sample) || len(data) > 256 {
 		return ErrInvalidDataLength
 	}
-
-	defer s.reset()
 
 	// check if the dataset begins with  '{'
 	if data[s.position] != ObjectStart {
@@ -75,7 +75,7 @@ func (s *Scanner) SeekIn(data []byte) error {
 		//fmt.Println("position", s.position)
 
 		// passing all whitespaces if it is not value
-		if !s.value && whitespace[s.byte] {
+		if !s.readText && whitespace[s.byte] {
 			//fmt.Println("passing a whitespace")
 			continue
 		}
@@ -89,7 +89,7 @@ func (s *Scanner) SeekIn(data []byte) error {
 			}
 
 			//fmt.Println("we have to read data now")
-			s.read = true
+			s.readText = true
 			continue
 		case Colon:
 			//fmt.Println("waiting for value")
@@ -133,7 +133,7 @@ func (s *Scanner) SeekIn(data []byte) error {
 			s.pass = true
 			continue
 		default:
-			if s.read {
+			if s.readText {
 				// we found the value start position, the final step is to read data
 				return s.readString()
 			}
@@ -181,9 +181,10 @@ func (s *Scanner) reset() {
 	//s.data = nil
 	s.value = false
 	s.pass = false
-	s.read = false
+	s.readText = false
 	//s.parsedData = nil
 	//s.parsedBool = false
+	s.parsedNumber = 0
 }
 
 // validateToken compares the sample and the data starting the position.
