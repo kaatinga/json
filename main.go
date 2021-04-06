@@ -1,7 +1,5 @@
 package json
 
-import "fmt"
-
 const unicodeMask = 0xf
 
 type Scanner struct {
@@ -67,46 +65,46 @@ func (s *Scanner) SeekIn(data []byte) error {
 		s.byte = s.data[s.position]
 
 		if s.byte != Comma && s.pass {
-			//fmt.Println("fast continue")
+			//fmt.println("fast continue")
 			continue
 		}
 
-		//fmt.Printf("we are checking %#v\n", s.byte)
-		//fmt.Println("position", s.position)
+		//fmt.printf("we are checking %#v\n", s.byte)
+		//fmt.println("position", s.position)
 
 		// passing all whitespaces if it is not value
 		if !s.readText && whitespace[s.byte] {
-			//fmt.Println("passing a whitespace")
+			//fmt.println("passing a whitespace")
 			continue
 		}
 
 		switch s.byte {
 		case QuotationMark:
 			if !s.value {
-				//fmt.Println("checking the token...")
+				//fmt.println("checking the token...")
 				s.pass = !s.validateToken()
 				continue
 			}
 
-			//fmt.Println("we have to read data now")
+			//fmt.println("we have to read data now")
 			s.readText = true
 			continue
 		case Colon:
-			//fmt.Println("waiting for value")
+			//fmt.println("waiting for value")
 			if s.value {
-				//fmt.Println("we are waiting for a value already, colon is repeated")
+				//fmt.println("we are waiting for a value already, colon is repeated")
 				return ErrInvalidJSON
 			}
 			s.value = true
 			continue
 		case ObjectStart:
-			//fmt.Println("internal objects are not supported")
+			//fmt.println("internal objects are not supported")
 			s.pass = true
 			continue
 		case ObjectEnd:
 			return WarnNotFound
 		case Comma:
-			//fmt.Println("next sample begins")
+			//fmt.println("next sample begins")
 			s.newParameter()
 			continue
 		case True:
@@ -126,10 +124,10 @@ func (s *Scanner) SeekIn(data []byte) error {
 			}
 			return ErrInvalidJSON
 		case ArrayEnd:
-			//fmt.Println("array is unsupported, soon we will finish")
+			//fmt.println("array is unsupported, soon we will finish")
 			continue
 		case ArrayStart:
-			//fmt.Println("array is unsupported")
+			//fmt.println("array is unsupported")
 			s.pass = true
 			continue
 		default:
@@ -138,11 +136,11 @@ func (s *Scanner) SeekIn(data []byte) error {
 				return s.readString()
 			}
 			if s.value {
-				fmt.Println("numbers case assumed")
+				//fmt.println("numbers case assumed")
 				return s.readNumber()
 			}
 
-			//fmt.Println("read is not true")
+			//fmt.println("read is not true")
 			continue
 		}
 	}
@@ -151,23 +149,23 @@ func (s *Scanner) SeekIn(data []byte) error {
 
 // validate checks the value and input sample.
 func (s *Scanner) validate(sample []byte) bool {
-	//fmt.Println("checking bool value:", string(sample))
+	//fmt.println("checking bool value:", string(sample))
 	start := s.position
 
 	end := s.position + len(sample)
-	//fmt.Println("установили конечную точку сравнения")
+	//fmt.println("установили конечную точку сравнения")
 
 	if end > len(s.data) {
-		//fmt.Println("конечная точка неожиданно дальше максимальной длины данных")
+		//fmt.println("конечная точка неожиданно дальше максимальной длины данных")
 		return false
 	}
 
 	for ; s.position != end; s.position++ {
 		if s.position < len(s.data) && sample[s.position-start] != s.data[s.position] {
-			//fmt.Println("один из байтов имени переменной не совпадает или мы вышли за рамки")
-			//fmt.Printf("comparing %#v and %#v\n", sample[s.position-start], s.data[s.position])
-			//fmt.Println("position", s.position)
-			//fmt.Println("end", end)
+			//fmt.println("один из байтов имени переменной не совпадает или мы вышли за рамки")
+			//fmt.printf("comparing %#v and %#v\n", sample[s.position-start], s.data[s.position])
+			//fmt.println("position", s.position)
+			//fmt.println("end", end)
 			return false
 		}
 	}
@@ -191,32 +189,32 @@ func (s *Scanner) reset() {
 func (s *Scanner) validateToken() bool {
 
 	if s.data[s.position] == QuotationMark {
-		//fmt.Println("проверяем название переменной. сдвигаем вперед так как кавычка")
+		//fmt.println("проверяем название переменной. сдвигаем вперед так как кавычка")
 		s.position++
 	}
 
 	start := s.position
 	end := s.position + len(s.sample)
-	//fmt.Println("установили конечную точку сравнения")
+	//fmt.println("установили конечную точку сравнения")
 
 	if end > len(s.data) {
-		//fmt.Println("конечная точка неожиданно дальше максимальной длины данных")
+		//fmt.println("конечная точка неожиданно дальше максимальной длины данных")
 		return false
 	}
 
 	for ; s.position != end; s.position++ {
 		if s.position < len(s.data) && s.sample[s.position-start] != s.data[s.position] {
-			//fmt.Println("один из байтов имени переменной не совпадает или мы вышли за рамки")
-			//fmt.Printf("comparing %#v and %#v\n", s.sample[s.position-start], s.data[s.position])
-			//fmt.Println("position", s.position)
-			//fmt.Println("end", end)
+			//fmt.println("один из байтов имени переменной не совпадает или мы вышли за рамки")
+			//fmt.printf("comparing %#v and %#v\n", s.sample[s.position-start], s.data[s.position])
+			//fmt.println("position", s.position)
+			//fmt.println("end", end)
 			return false
 		}
 	}
 
 	// as we are here, we can check colon that it fallows the last position
 	if s.position < len(s.data) && s.data[s.position] != QuotationMark {
-		//fmt.Println("the data were similar but not the sample :)")
+		//fmt.println("the data were similar but not the sample :)")
 		return false
 	}
 
@@ -228,11 +226,11 @@ func (s *Scanner) readString() error {
 
 	var end int
 	var start = s.position
-	//fmt.Println("value start is set:", start)
+	//fmt.println("value start is set:", start)
 	for ; s.position < len(s.data); s.position++ {
 		if s.data[s.position] == QuotationMark {
 			end = s.position
-			//fmt.Println("value end is set:", end)
+			//fmt.println("value end is set:", end)
 			break
 		}
 	}
@@ -248,7 +246,7 @@ func (s *Scanner) readString() error {
 // readNumber reads value data starting the position.
 func (s *Scanner) readNumber() error {
 	if s.data[s.position] == Minus {
-		fmt.Println("the number will be negative")
+		//fmt.println("the number will be negative")
 		s.position++
 		return s.checkNegativeNumber()
 	}
@@ -264,7 +262,7 @@ func (s *Scanner) checkNumber() error {
 		return WarnFloatNotSupported
 	}
 	if s.data[s.position] < 0x30 || s.data[s.position] > 0x39 {
-		fmt.Printf("value %#v\n", s.data[s.position])
+		//fmt.printf("value %#v\n", s.data[s.position])
 		return ErrInvalidJSON
 	}
 	s.parsedNumber = (s.parsedNumber << 3) + (s.parsedNumber << 1) + int64(s.data[s.position])&unicodeMask
