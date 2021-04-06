@@ -67,8 +67,8 @@ func TestScanner_readData(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			s := &tt.scanner
-			if err := s.readData(); (err != nil) != tt.wantErr {
-				t.Errorf("readData() error = %v, wantErr %v", err, tt.wantErr)
+			if err := s.readString(); (err != nil) != tt.wantErr {
+				t.Errorf("readString() error = %v, wantErr %v", err, tt.wantErr)
 			}
 
 			if !reflect.DeepEqual(s.parsedData, tt.result) {

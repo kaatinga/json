@@ -1,5 +1,7 @@
 package json
 
+import "fmt"
+
 type Scanner struct {
 	position int
 	byte
@@ -130,7 +132,11 @@ func (s *Scanner) SeekIn(data []byte) error {
 		default:
 			if s.read {
 				// we found the value start position, the final step is to read data
-				return s.readData()
+				return s.readString()
+			}
+			if s.value {
+				fmt.Println("numbers case assumed")
+				return s.readNumbers()
 			}
 
 			//fmt.Println("read is not true")
@@ -213,8 +219,8 @@ func (s *Scanner) validateToken() bool {
 	return true
 }
 
-// readData reads value data starting the position.
-func (s *Scanner) readData() error {
+// readString reads value data starting the position.
+func (s *Scanner) readString() error {
 
 	var end int
 	var start = s.position
