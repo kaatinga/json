@@ -2,6 +2,7 @@ package json
 
 import (
 	"reflect"
+	"strconv"
 	"testing"
 )
 
@@ -165,6 +166,51 @@ func TestScanner_Seek(t *testing.T) {
 			}
 
 			t.Log(string(s.data))
+		})
+	}
+}
+
+func TestScanner_readNumber(t *testing.T) {
+
+	json1 := []byte{0x7b, 0x22, 0x73, 0x65, 0x63, 0x72, 0x65, 0x74, 0x22, 0x3a, 0x20, 0x31, 0x32, 0x33, 0x7d}
+	json2 := []byte{0x7b, 0x22, 0x73, 0x65, 0x63, 0x72, 0x65, 0x74, 0x22, 0x3a, 0x20, 0x2d, 0x31, 0x32, 0x33, 0x7d}
+	json3 := []byte{0x7b, 0x22, 0x73, 0x65, 0x63, 0x72, 0x65, 0x74, 0x22, 0x3a, 0x20, 0x2d, 0x31, 0x32, 0x2e, 0x33, 0x7d}
+
+	tests := []struct {
+		scanner      Scanner
+		resultMustBe int
+		wantErr      error
+	}{
+		{Scanner{
+			position: 11,
+			byte:     0,
+			sample:   secret,
+			data:     json1,
+		}, 123, nil},
+		{Scanner{
+			position: 11,
+			byte:     0,
+			sample:   secret,
+			data:     json2,
+		}, -123, nil},
+		{Scanner{
+			position: 11,
+			byte:     0,
+			sample:   secret,
+			data:     json3,
+		}, -12, WarnFloatNotSupported},
+	}
+	for _, tt := range tests {
+		t.Run(strconv.Itoa(tt.resultMustBe), func(t *testing.T) {
+			s := &tt.scanner
+			err := s.readNumber()
+			if err != tt.wantErr {
+				t.Errorf("readNumber() error = %v, wantErr %v", err, tt.wantErr)
+			}
+
+			if s.parsedNumber != int64(tt.resultMustBe) {
+				t.Errorf("readNumber() result is incorrect\nhave %d\nwant %d", s.parsedNumber, tt.resultMustBe)
+			}
 		})
 	}
 }
