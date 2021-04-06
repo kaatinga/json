@@ -10,8 +10,9 @@ const (
 
 	ErrInvalidValue cer.Error = "the value was not read as data format is corrupted"
 
-	WarnNotFound         cer.Warning = "the sample was not found in the provided data"
-	WarnNullWasFound     cer.Warning = "null was detected as value"
-	WarnBoolWasFound     cer.Warning = "bool value was detected as value"
-	WarnUnsupportedArray cer.Warning = "arrays are unsupported"
+	WarnNotFound          cer.Warning = "the sample was not found in the provided data"
+	WarnNullWasFound      cer.Warning = "null was detected as value"
+	WarnBoolWasFound      cer.Warning = "bool value was detected as value"
+	WarnUnsupportedArray  cer.Warning = "arrays are unsupported"
+	WarnFloatNotSupported cer.Warning = "float type not supported yet"
 )
