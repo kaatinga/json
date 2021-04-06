@@ -6,7 +6,6 @@ type Scanner struct {
 	sample     []byte
 	data       []byte
 	started    bool
-	finished   bool
 	value      bool // the field is found and we ready to read value
 	pass       bool // to pass value indicator
 	read       bool
@@ -95,9 +94,7 @@ func (s *Scanner) SeekIn(data []byte) error {
 			//fmt.Println("parsing started")
 			continue
 		case ObjectEnd:
-			s.finished = true
-			//fmt.Println("parsing finished")
-			continue
+			return WarnNotFound
 		case Comma:
 			//fmt.Println("next sample begins")
 			s.newParameter()
