@@ -94,6 +94,10 @@ func (s *Scanner) SeekIn(data []byte) error {
 			}
 			s.value = true
 			continue
+		case ObjectStart:
+			//fmt.Println("internal objects are not supported")
+			s.pass = true
+			continue
 		case ObjectEnd:
 			return WarnNotFound
 		case Comma:
