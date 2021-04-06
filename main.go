@@ -50,6 +50,12 @@ func (s *Scanner) SeekIn(data []byte) error {
 
 	defer s.reset()
 
+	// check if the dataset begins with  '{'
+	if data[s.position] != ObjectStart {
+		return ErrInvalidJSON
+	}
+
+	s.position++
 	s.data = data
 
 	for ; s.position < len(s.data); s.position++ {
@@ -88,10 +94,6 @@ func (s *Scanner) SeekIn(data []byte) error {
 				return ErrInvalidJSON
 			}
 			s.value = true
-			continue
-		case ObjectStart:
-			s.started = true
-			//fmt.Println("parsing started")
 			continue
 		case ObjectEnd:
 			return WarnNotFound
