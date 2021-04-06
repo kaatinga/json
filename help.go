@@ -27,6 +27,7 @@ const (
 	True          byte = 't'
 	False         byte = 'f'
 	Null          byte = 'n'
+	Minus         byte = '-'
 )
 
 var (
