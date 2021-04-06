@@ -2,16 +2,19 @@ package json
 
 import "fmt"
 
+const unicodeMask = 0xf
+
 type Scanner struct {
 	position int
 	byte
-	sample     []byte
-	data       []byte
-	value      bool // the field is found and we ready to read value
-	pass       bool // to pass value indicator
-	read       bool
-	parsedData []byte
-	parsedBool bool
+	sample       []byte
+	data         []byte
+	value        bool // the field is found and we ready to read value
+	pass         bool // to pass value indicator
+	read         bool
+	parsedData   []byte
+	parsedBool   bool
+	parsedNumber int64
 }
 
 // NewScanner creates new scanner with a sample inside.
@@ -136,7 +139,7 @@ func (s *Scanner) SeekIn(data []byte) error {
 			}
 			if s.value {
 				fmt.Println("numbers case assumed")
-				return s.readNumbers()
+				return s.readNumber()
 			}
 
 			//fmt.Println("read is not true")
@@ -239,6 +242,49 @@ func (s *Scanner) readString() error {
 
 	s.parsedData = s.data[start:end]
 	return nil
+}
+
+// readNumber reads value data starting the position.
+func (s *Scanner) readNumber() error {
+	if s.data[s.position] == Minus {
+		fmt.Println("the number will be negative")
+		s.position++
+		return s.checkNegativeNumber()
+	}
+	return s.checkNumber()
+}
+
+// checkNumber checks positive numbers.
+func (s *Scanner) checkNumber() error {
+	if s.data[s.position] == ObjectEnd || s.data[s.position] == Comma {
+		return nil
+	}
+	if s.data[s.position] == Dot {
+		return WarnFloatNotSupported
+	}
+	if s.data[s.position] < 0x30 || s.data[s.position] > 0x39 {
+		fmt.Printf("value %#v\n", s.data[s.position])
+		return ErrInvalidJSON
+	}
+	s.parsedNumber = (s.parsedNumber << 3) + (s.parsedNumber << 1) + int64(s.data[s.position])&unicodeMask
+	s.position++
+	return s.checkNumber()
+}
+
+// checkNumber checks negative numbers.
+func (s *Scanner) checkNegativeNumber() error {
+	if s.data[s.position] == ObjectEnd || s.data[s.position] == Comma {
+		return nil
+	}
+	if s.data[s.position] == Dot {
+		return WarnFloatNotSupported
+	}
+	if s.data[s.position] < 0x30 || s.data[s.position] > 0x39 {
+		return ErrInvalidJSON
+	}
+	s.parsedNumber = (s.parsedNumber << 3) + (s.parsedNumber << 1) - int64(s.data[s.position])&unicodeMask
+	s.position++
+	return s.checkNegativeNumber()
 }
 
 var whitespace = [256]bool{
