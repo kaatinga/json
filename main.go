@@ -5,7 +5,6 @@ type Scanner struct {
 	byte
 	sample     []byte
 	data       []byte
-	started    bool
 	value      bool // the field is found and we ready to read value
 	pass       bool // to pass value indicator
 	read       bool
@@ -134,9 +133,6 @@ func (s *Scanner) SeekIn(data []byte) error {
 			continue
 		}
 	}
-	if !s.started {
-		return ErrInvalidJSON
-	}
 	return WarnNotFound
 }
 
@@ -170,7 +166,6 @@ func (s *Scanner) reset() {
 	//s.byte = 0
 	//sample     []byte
 	//s.data = nil
-	s.started = false
 	s.value = false
 	s.pass = false
 	s.read = false
