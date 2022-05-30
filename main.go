@@ -3,16 +3,16 @@ package json
 const unicodeMask = 0xf
 
 type Scanner struct {
-	position int
-	byte
+	position     int
+	parsedNumber int64
 	sample       []byte
 	data         []byte
-	value        bool // the field is found and we ready to read value
-	pass         bool // to pass value indicator
-	readText     bool
 	parsedData   []byte
-	parsedBool   bool
-	parsedNumber int64
+	byte
+	value      bool // the field is found and we ready to read value
+	pass       bool // to pass value indicator
+	readText   bool
+	parsedBool bool
 }
 
 // NewScanner creates new scanner with a sample inside.
